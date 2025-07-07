@@ -1,0 +1,44 @@
+name: Build Installer 
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: 'x64'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r Installer/requirements.txt
+
+      - name: Generate secrets.py
+        shell: bash
+        run: |
+          echo "${{ secrets.INSTALLER_SECRET }}" | while IFS='=' read -r key value; do
+            if [[ -z "$key" || "$key" =~ ^# ]]; then continue; fi
+            key="$(echo "$key" | xargs)"
+            value="$(echo "$value" | xargs)"
+            echo "$key = \"${value//\"/\\\"}\"" >> Installer/secrets.py
+          done
+
+      - name: Build Installer.exe
+        run: pyinstaller Installer/Installer.spec
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Installer
+          path: dist/Installer.exe

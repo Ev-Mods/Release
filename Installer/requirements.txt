@@ -1,0 +1,6 @@
+wmi
+pywin32
+ttkbootstrap
+speedtest-cli
+pyinstaller==5.13.2
+huggingface_hub[hf_xet]
