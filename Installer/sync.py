@@ -4,15 +4,17 @@ import requests, pythoncom
 from io import StringIO
 from datetime import datetime, timezone
 from pathlib import Path
+import shutil
 from contextlib import contextmanager
 from secrets import REPO_ID, REPO_TOKEN, LOG_REPO_ID, LOG_TOKEN
 
 VARIANT_MAP = {
-    "Mini": {"repo_folders_to_target": ["Texture++ Mini"], "local_dir": "Texture++ Mini", "size_gb": 1.0},
-    "Base": {"repo_folders_to_target": ["Base_4X"], "local_dir": "Texture++ Base", "size_gb": 12.0},
-    "Core": {"repo_folders_to_target": ["Base_4X", "Core_2X"], "local_dir": "Texture++ Core", "size_gb": 15.0},
-    "Core 4K": {"repo_folders_to_target": ["Base_4X", "Core_4X"], "local_dir": "Texture++ Core 4K", "size_gb": 26.0},
-    "Finale": {"repo_folders_to_target": ["Base_4X", "Core_4X", "World_2X"], "local_dir": "Texture++ Finale", "size_gb": 55.0}
+    "Mini": {"repo_folders": ["Texture++ Mini"], "local_dir": "Texture++ Mini", "size_gb": 1.0},
+    "Base": {"repo_folders": ["Base_4X"], "local_dir": "Texture++ Base", "size_gb": 12.0},
+    "Core": {"repo_folders": ["Base_4X", "Core_2X"], "local_dir": "Texture++ Core", "size_gb": 16.0},
+    "Core 4K": {"repo_folders": ["Base_4X", "Core_4X"], "local_dir": "Texture++ Core 4K", "size_gb": 27.0},
+    "Finale": {"repo_folders": ["Base_4X", "Core_4X", "World_2X"], "local_dir": "Texture++ Finale", "size_gb": 58.0},
+    "Advanced": {"repo_folders": [], "local_dir": "Texture++ Custom"}
 }
 
 @contextmanager
@@ -78,12 +80,26 @@ def get_utc_time():
         pass
     return datetime.now(timezone.utc).isoformat().split('.')[0]
 
+def clear_hf_cache():
+    try:
+        os.environ.pop('HF_HOME', None)
+        hf_home = os.getenv("HF_HOME", Path.home() / ".cache" / "huggingface")
+        cache_dir = Path(hf_home) / "hub"
+        print(cache_dir)
+        if cache_dir.exists() and cache_dir.is_dir():
+            shutil.rmtree(cache_dir)
+            
+    except Exception as e:
+        pass
+
+
 def sync_repo(mods_folder: str, variant: str, use_mirror: bool, status_callback=None, stop_event=None, download_speed_mbps=None):
     def log(message):
         print(message)
         if status_callback:
             status_callback(message)
-
+    
+    os.environ.pop('HF_HUB_DISABLE_PROGRESS_BARS', None)
     if use_mirror:
         os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
     from huggingface_hub import HfApi, snapshot_download
@@ -104,7 +120,7 @@ def sync_repo(mods_folder: str, variant: str, use_mirror: bool, status_callback=
     try:
         log_capture_buffer = StringIO()
         with redirect_stdout_stderr(log_capture_buffer):
-            for folder_name in variant_details["repo_folders_to_target"]:
+            for folder_name in variant_details["repo_folders"]:
                 log(f"Downloading '{folder_name}'...")
                 snapshot_download(
                     repo_id=REPO_ID,
@@ -135,7 +151,8 @@ def sync_repo(mods_folder: str, variant: str, use_mirror: bool, status_callback=
         and file_path.name not in texture_files_in_ini
         and file_path.unlink(missing_ok=True) is None
     )
-    log(f"Cleaned unused files.")
+
+    clear_hf_cache()
 
     hardware_data = get_hardware_info()
     timestamp = get_utc_time()
