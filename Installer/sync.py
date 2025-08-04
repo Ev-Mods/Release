@@ -82,7 +82,6 @@ def get_utc_time():
 
 def clear_hf_cache():
     try:
-        os.environ.pop('HF_HOME', None)
         hf_home = os.getenv("HF_HOME", Path.home() / ".cache" / "huggingface")
         cache_dir = Path(hf_home) / "hub"
         print(cache_dir)
@@ -99,6 +98,7 @@ def sync_repo(mods_folder: str, variant: str, use_mirror: bool, status_callback=
         if status_callback:
             status_callback(message)
     
+    os.environ.pop('HF_HOME', None)
     os.environ.pop('HF_HUB_DISABLE_PROGRESS_BARS', None)
     if use_mirror:
         os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
