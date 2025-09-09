@@ -13,7 +13,6 @@ VARIANT_MAP = {
     "Base": {"repo_folders": ["Base_4X"], "local_dir": "Texture++ Base", "size_gb": 12.0},
     "Core": {"repo_folders": ["Base_4X", "Core_2X"], "local_dir": "Texture++ Core", "size_gb": 16.0},
     "Core 4K": {"repo_folders": ["Base_4X", "Core_4X"], "local_dir": "Texture++ Core 4K", "size_gb": 27.0},
-    "Finale": {"repo_folders": ["Base_4X", "Core_4X", "World_2X"], "local_dir": "Texture++ Finale", "size_gb": 58.0},
     "Advanced": {"repo_folders": [], "local_dir": "Texture++ Custom"}
 }
 

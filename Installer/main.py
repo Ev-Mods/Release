@@ -130,7 +130,7 @@ class UpdaterApp:
             if "size_gb" in variant_details:
                 base_seconds = variant_details["size_gb"] * 8 * 1000 / self.download_speed_mbps
                 folders = variant_details.get("repo_folders", [])
-                extra_seconds = ( 30 * ("Base_4X" in folders) + 60 * (("Core_2X" in folders) or ("Core_4X" in folders)) + 120 * ("World_2X" in folders) )
+                extra_seconds = ( 30 * ("Base_4X" in folders) + 60 * (("Core_2X" in folders) or ("Core_4X" in folders)))
                 total_seconds = base_seconds + extra_seconds
                 if total_seconds < 60:
                     time_str = f"{round(total_seconds)} seconds"
@@ -268,7 +268,6 @@ class SelectionFrame(ttk.Frame):
             {"value": "Base", "text": "Base (~12GB)"},
             {"value": "Core", "text": "Core (~15GB)"},
             {"value": "Core 4K", "text": "Core 4K (~26GB)"},
-            {"value": "Finale", "text": "Finale (~55GB)"},
             {"value": "Advanced", "text": "Advanced (Custom)"},
         ]
 
@@ -284,7 +283,7 @@ class SelectionFrame(ttk.Frame):
             ).pack(anchor="w", padx=20, pady=2)
 
         self.advanced_frame = ttk.Frame(self)
-        self.advanced_options = ["Base_4X", "Core_2X", "Core_4X", "World_2X"]
+        self.advanced_options = ["Base_4X", "Core_2X", "Core_4X"]
         self.advanced_vars = {opt: tk.BooleanVar(value=False) for opt in self.advanced_options}
         
         for option in self.advanced_options:
